@@ -382,10 +382,13 @@ async def normalize_gemini_request(
 
     # 2. 参数范围限制
     if generation_config:
-        # 强制设置 maxOutputTokens 为 64000
-        generation_config["maxOutputTokens"] = 64000
-        # 强制设置 topK 为 64
-        generation_config["topK"] = 64
+        # 设置 maxOutputTokens: 使用传入的值，若未指定则默认 8192
+        # 注意: gemini-2.0-flash 系列最大支持 8192 tokens
+        if "maxOutputTokens" not in generation_config or generation_config["maxOutputTokens"] is None:
+            generation_config["maxOutputTokens"] = 8192  # 安全默认值
+        # 设置 topK: 使用传入的值，若未指定则默认 64
+        if "topK" not in generation_config or generation_config["topK"] is None:
+            generation_config["topK"] = 64
 
     if "contents" in result:
         cleaned_contents = []
